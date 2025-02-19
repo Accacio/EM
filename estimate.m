@@ -5,6 +5,9 @@ load('./estimation_data.mat')
 
 modes = 2^2;
 [n, N]=size(Theta);
+rand_perm=randperm(size(Theta, 2));
+Theta=Theta(:, rand_perm)
+Lambdas(:,:,1)=Lambdas(:,rand_perm,1)
 
 P = H(:,:,1)
 s = f(:,1)
