@@ -5,9 +5,13 @@ load('./estimation_data.mat')
 
 modes = 2^2;
 [n, N]=size(Theta);
+
+% shuffle data
 rand_perm=randperm(size(Theta, 2));
 Theta=Theta(:, rand_perm)
-Lambdas(:,:,1)=Lambdas(:,rand_perm,1)
+for i=1:4
+Lambdas(:,:,i)=Lambdas(:,rand_perm,i)
+end
 
 P = H(:,:,1)
 s = f(:,1)
