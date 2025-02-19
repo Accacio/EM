@@ -65,7 +65,7 @@ dsys=c2d(csys,Te); %= Discretize systems
 
 %= search space
 % see https://accacio.gitlab.io/blog/matlab_combinations/
-values=linspace(Umax/2,2*Umax,10);
+values=linspace(0.5*Umax,1.5*Umax,10);
 [ v{1:n} ]=ndgrid(values);
 em_theta(:,:) =cell2mat(cellfun(@(x) reshape(x,[],1),v,'UniformOutput',0))';
 
