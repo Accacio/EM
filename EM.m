@@ -10,11 +10,11 @@ function [Phi,z,residues,norm_err] = EM(X,Y,phi_init,modes,maxIter,maxErr)
     else
         Phi=phi_init;
     end
+    Phi_new=Phi;
     OldPhi=zeros(size(Phi));
     OldclusterSize=zeros(1,modes);
 
     Sigma_amp=100;
-    % Sigma_amp=10000;
     Sigma(:,:,1:modes)=repmat(Sigma_amp*eye(n),1,1,modes);
 
     exit_msg=0;
@@ -50,33 +50,39 @@ function [Phi,z,residues,norm_err] = EM(X,Y,phi_init,modes,maxIter,maxErr)
             resp2=cellfun(@(x) x*eye(n),mat2cell(responsibilities',ones(1,N)),'UniformOutput',0);
             Gamma=sqrt(sparse(blkdiag(resp2{:})));
 
-            Phi(i,:)=-(Gamma*Omega)\(Gamma*Y(:));
+            Phi_new(i,:)=-(Gamma*Omega)\(Gamma*Y(:));
+
+            y_lin_new=reshape(Omega*-Phi(i,:)',n,N);
+            err_lin(:,:,i)=Y-y_lin_new;
         end
-        residues=Y(:)-Omega*Phi.';
+
+        Responsibilities_sums=sum(Responsibilities,2);
+
+        for i=1:modes
+            err_lin_cell(:,:,i) = cellfun(@(x) x',mat2cell(err_lin(:,:,i)',ones(1,N))','UniformOutput',0);
+            err_lin_mult=cellfun(@(x,y) x.'*y,err_lin_cell(:,:,i),err_lin_cell(:,:,i));
+            Sigma_new_i=sum(Responsibilities(i,:).*err_lin_mult)/Responsibilities_sums(i)
+            Sigma_new(:,:,i)=eye(n)*Sigma_new_i;
+        end
 
         [~,z]=max(Responsibilities,[],1);
-        for i=1:modes
-            z_i=find(z==i);
-            clusterSize(i)=size(z_i,2);
-            if OldclusterSize(i)==clusterSize(i)
-                Sigma(:,:,i)=Sigma(:,:,i)*.8;
-            end
-        end
 
+        residues=Y(:)-Omega*Phi_new.';
         norm_err=norm(residues,'fro');
-        if norm_err<maxErr
+
+        if norm_err/norm(Y,'fro')<maxErr
             exit_msg=1;
             break;
         end
 
-
-        if norm(OldPhi-Phi,'fro')<maxErr
+        if max(sum((Phi_new-Phi).^2,2))<maxErr
             exit_msg=2;
             break;
         end
 
-        OldclusterSize=clusterSize;
-        OldPhi=Phi;
+        % OldclusterSize=clusterSize;
+        Phi=Phi_new;
+        Sigma=Sigma_new;
     end
 
     switch exit_msg
