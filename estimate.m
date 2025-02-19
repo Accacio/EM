@@ -52,29 +52,38 @@ disp(P_mult)
 
 return
 %% plot data
-for lambda_idx=1:2
 fig=figure;
-subplot(1,2,1)
+for lambda_idx=1:2
+subplot(1,2,lambda_idx)
 scatter3(Theta(1,:),Theta(2,:),Lambdas(lambda_idx,:,1),'k')
-sgtitle(['$\lambda_' num2str(lambda_idx) '$'],'interpreter','latex')
+title(['$\lambda_' num2str(lambda_idx) '$'],'interpreter','latex')
 end
 
 %% final plot
-for lambda_idx=1:2
 fig=figure;
-subplot(1,2,1)
+for lambda_idx=1:2
+subplot(1,2,lambda_idx)
 z_colors={'r','b','k','g'};
 for idx_z=1:4;
 scatter3(Theta(1,z==idx_z),Theta(2,z==idx_z),Lambdas(lambda_idx,z==idx_z,1),z_colors{idx_z})
 hold on
 end
 hold off
-subplot(1,2,2)
-for idx_z=1:4;
-scatter3(Theta(1,z==idx_z),Theta(2,z==idx_z),Lambdas(lambda_idx,z==idx_z,2),z_colors{idx_z})
-hold on
-end
-hold off
-sgtitle(['$\lambda_' num2str(lambda_idx) '$'],'interpreter','latex')
+title(['$\lambda_' num2str(lambda_idx) '$'],'interpreter','latex')
 % legend(["Nominal","Modified"])
 end
+
+%%
+
+Theta2=Theta(:,z==2).';
+z_idx=convhull(Theta2);
+Theta2(z_idx,:).'
+return
+figure
+[x y] = meshgrid(-10:1:10);
+hold on
+for i=1:modes
+f_val = P_est(1,1,i).*x + P_est(1,2,i).*y + s_est(1,i);
+surf(x,y,f_val,'FaceColor','none','EdgeColor',z_colors{i});
+end
+hold off
