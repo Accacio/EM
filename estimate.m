@@ -24,26 +24,22 @@ inactive=setdiff(1:n,active);
 P_mult(active,active,k+1)=adjoint(invP(active,active)).'./det(P(inactive,inactive))*det(P);
 end
 
-
-% maxN=20;
-% Theta = Theta(:,1:maxN);
-% Lambdas = Lambdas(:,1:maxN,:);
-
 %%
-maxIter=1000;
-maxErr=1e-10;
-Phi0=kron([vec(H(:,:,1)).' f(:,1).'],ones(1,2^n).')+1.*rand(2^n,n^2+n);
-Phi0=[reshape(P_mult,2^n,n^2).' zeros(2^n,n) ]+1.*rand(2^n,n^2+n);
-[Phi,z,err,normErr]=EM(Theta,Lambdas(:,:,1),Phi0,modes,maxIter,maxErr);
-% [Phi,z,err,normErr]=EM(Theta,Lambdas(:,:,1),[],modes,maxIter,maxErr);
+%= EM params
+maxIter=200;
+maxErr=1e-12;
+% Phi0=kron([vec(H(:,:,1)).' f(:,1).'],ones(1,2^n).')+1.*rand(2^n,n^2+n);
+% Phi0=[reshape(P_mult,2^n,n^2).' zeros(2^n,n) ]+0.*rand(2^n,n^2+n);
+% [Phi,z,err,normErr]=EM(Theta,Lambdas(:,:,1),Phi0,modes,maxIter,maxErr);
+[Phi,z,err,normErr]=EM(Theta,Lambdas(:,:,1),[],modes,maxIter,maxErr);
 
-Phi=sort(Phi);
+% [Phi I]=sort(Phi);
 for i=1:modes
 P_est(:,:,i)=reshape(Phi(i,1:n^2),2,2);
 s_est(:,i)=reshape(Phi(i,n^2+1:end),1,n);
 end
-sum(P_est(:,:,1)==0)==n
-P_est(abs(P_est)<1e-5)=0
+sum(P_est(:,:,1)==0)==n;
+P_est(abs(P_est)<1e-5)=0;
 
 disp(['Estimated Ps'])
 disp(P_est)
